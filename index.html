@@ -69,7 +69,15 @@ td{padding:9px 10px;text-align:right;border-bottom:1px solid #f0ece3;font-size:1
 tr.row:active td{background:#f3efe6}
 tr.last td{background:#f2f7f3}
 .empty{padding:28px 20px;text-align:center;color:var(--muted);font-size:14px;line-height:1.5}
-.pad{background:var(--keybg);padding:6px 6px calc(6px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.padbar{background:var(--keybg);display:flex;justify-content:center;padding:3px 0 0}
+.padbar button{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:#5d5a52;padding:5px 16px;border-radius:14px}
+.padbar button:active{background:#cfc9bc}
+.kbshow{display:none;position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));width:62px;height:62px;border-radius:31px;background:var(--brand2);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.28);place-items:center;z-index:5}
+.kbshow:active{background:var(--brand)}
+body.kbhidden .pad,body.kbhidden .padbar{display:none}
+body.kbhidden .kbshow{display:grid}
+body.kbhidden .list{padding-bottom:96px}
+.pad{background:var(--keybg);padding:4px 6px calc(6px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .k{height:50px;border-radius:10px;background:var(--key);color:var(--keyink);font-size:24px;font-weight:500;box-shadow:0 1px 0 rgba(0,0,0,.18);display:grid;place-items:center}
 .k:active{background:#ece8de}
 .k.fn{background:#c7c1b3;font-size:16px;font-weight:600}
@@ -136,12 +144,14 @@ pre.report{white-space:pre-wrap;font:13px/1.45 ui-monospace,Menlo,monospace;back
   </div>
   <div class="list" id="list"></div>
 </main>
+<div class="padbar" id="padbar"><button id="kbHide"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg><span id="kbHideTxt">Сховати клавіатуру</span></button></div>
 <div class="pad" id="pad">
   <button class="k" data-k="1">1</button><button class="k" data-k="2">2</button><button class="k" data-k="3">3</button><button class="k fn" data-k="back" aria-label="backspace"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 5H9l-6 7 6 7h12z"/><path d="M17 9l-6 6M11 9l6 6"/></svg></button>
   <button class="k" data-k="4">4</button><button class="k" data-k="5">5</button><button class="k" data-k="6">6</button><button class="k fn" data-k="next" id="kNext">L ⇄ Ø</button>
   <button class="k" data-k="7">7</button><button class="k" data-k="8">8</button><button class="k" data-k="9">9</button><button class="k add" data-k="add" aria-label="add">+</button>
   <button class="k fn" data-k="undo" id="kUndo">↶</button><button class="k" data-k="0">0</button><button class="k" data-k=",">,</button>
 </div>
+<button class="kbshow" id="kbShow" aria-label="keyboard"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg></button>
 
 <div class="veil" id="veil"></div>
 <div class="sheet" id="shSettings"></div>
@@ -538,7 +548,7 @@ const S = {
   emptySawn:"Введіть товщину, ширину, довжину і кількість, натисніть +.",
   settings:"Налаштування",method:"Метод для колод",gost:"ГОСТ 2708-75",cyl:"Циліндр (формула)",
   odd:"Непарні діаметри (від 14 см)",interp:"Інтерполяція",roundUp:"До парного ↑",
-  price:"Ціна за м³",currency:"Валюта",setPrice:"Вказати ціну",share:"Поділитися PDF",sharing:"Готую PDF…",nothing:"Список порожній",shareFail:"Меню «Поділитися» тут недоступне. Відкрийте PDF — і поділіться ним звідти.",openPdf:"Відкрити PDF",page:"Сторінка",method2:"Метод",priceHint:"Ціна застосовується до всього списку. Сума рахується з округленого об'єму.",lang:"Мова",done:"Готово",
+  price:"Ціна за м³",currency:"Валюта",setPrice:"Вказати ціну",hideKb:"Сховати клавіатуру",share:"Поділитися PDF",sharing:"Готую PDF…",nothing:"Список порожній",shareFail:"Меню «Поділитися» тут недоступне. Відкрийте PDF — і поділіться ним звідти.",openPdf:"Відкрити PDF",page:"Сторінка",method2:"Метод",priceHint:"Ціна застосовується до всього списку. Сума рахується з округленого об'єму.",lang:"Мова",done:"Готово",
   lists:"Списки",save:"Зберегти",saveAs:"Зберегти як новий",newL:"Новий список",open:"Відкрити",del:"Видалити",
   client:"Клієнт / постачальник",notes:"Примітки",listTitle:"Назва списку",noSaved:"Збережених списків ще немає.",
   report:"Звіт",copy:"Копіювати",copied:"Скопійовано — вставте у WhatsApp",copyFail:"Не вдалося скопіювати — виділіть текст вручну",
@@ -553,7 +563,7 @@ const S = {
   emptySawn:"Enter thickness, width, length and pieces, tap +.",
   settings:"Settings",method:"Log method",gost:"GOST 2708-75",cyl:"Cylinder (formula)",
   odd:"Odd diameters (14 cm+)",interp:"Interpolate",roundUp:"Round up to even",
-  price:"Price per m³",currency:"Currency",setPrice:"Set price",share:"Share PDF",sharing:"Preparing PDF…",nothing:"The list is empty",shareFail:"The share menu isn't available here. Open the PDF and share it from there.",openPdf:"Open PDF",page:"Page",method2:"Method",priceHint:"Price applies to the whole list. Total uses the rounded volume.",lang:"Language",done:"Done",
+  price:"Price per m³",currency:"Currency",setPrice:"Set price",hideKb:"Hide keypad",share:"Share PDF",sharing:"Preparing PDF…",nothing:"The list is empty",shareFail:"The share menu isn't available here. Open the PDF and share it from there.",openPdf:"Open PDF",page:"Page",method2:"Method",priceHint:"Price applies to the whole list. Total uses the rounded volume.",lang:"Language",done:"Done",
   lists:"Lists",save:"Save",saveAs:"Save as new",newL:"New list",open:"Open",del:"Delete",
   client:"Customer / supplier",notes:"Notes",listTitle:"List name",noSaved:"No saved lists yet.",
   report:"Report",copy:"Copy",copied:"Copied — paste into WhatsApp",copyFail:"Couldn't copy — select the text manually",
@@ -639,7 +649,7 @@ function renderEntry(){
       <div class="result"><span class="rk">${t("vol")}</span><span class="rv">${res||"—"}<small>м³</small></span></div>
       <div class="note"></div>`;
   }
-  el.querySelectorAll(".field").forEach(f=>f.onclick=()=>{ inp[mode].f=f.dataset.f; renderEntry(); });
+  el.querySelectorAll(".field").forEach(f=>f.onclick=()=>{ inp[mode].f=f.dataset.f; if(kbHidden) setKb(false); renderEntry(); });
   $("kNext").textContent = mode==="logs" ? "L ⇄ Ø" : "→";
 }
 function fieldHTML(key,lab,val,ph,unit,active){
@@ -680,6 +690,7 @@ function renderChrome(){
   $("tLogs").textContent=t("logs"); $("tSawn").textContent=t("sawn");
   $("tLogs").classList.toggle("on",mode==="logs"); $("tSawn").classList.toggle("on",mode==="sawn");
   $("listTitle").textContent = st.name || (st.client ? st.client : t("newList"));
+  $("kbHideTxt").textContent = t("hideKb");
   $("methodTag").textContent = mode==="sawn" ? "T×Ш×Д" : (cfg.method==="cyl"?t("cyl"):t("gost"));
 }
 function renderAll(){ renderChrome(); renderEntry(); renderList(); }
@@ -755,7 +766,7 @@ $("bSettings").onclick=()=>{
    <h3>${t("currency")}</h3>${seg("cur",CURS,cfg.cur)}
    <h3>${t("lang")}</h3>${seg("lang",[["uk","Українська"],["en","English"]],cfg.lang)}
    <button class="btn" id="sDone">${t("done")}</button>
-   <div class="hint" style="text-align:center;margin-top:12px">ЛісКуб · тест 0.4 · ${t("storeWarn")}</div>`;
+   <div class="hint" style="text-align:center;margin-top:12px">ЛісКуб · тест 0.5 · ${t("storeWarn")}</div>`;
   el.querySelectorAll(".seg").forEach(sg=>sg.querySelectorAll("button").forEach(b=>b.onclick=()=>{
     cfg[sg.dataset.seg]=b.dataset.v; sg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
     recompute(); persist(); renderAll(); if(sg.dataset.seg==="lang") $("bSettings").onclick();
@@ -962,7 +973,11 @@ function confirmBox(msg,yes){
 let tt; function toast(m){ const el=$("toast"); el.textContent=m; el.classList.add("on"); clearTimeout(tt); tt=setTimeout(()=>el.classList.remove("on"),1800); }
 function esc(s){ return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
-recompute(); renderAll();
+let kbHidden = !!store.get("kbHidden", false);
+function setKb(h){ kbHidden=h; document.body.classList.toggle("kbhidden", h); store.set("kbHidden", h); }
+$("kbHide").onclick=()=>setKb(true);
+$("kbShow").onclick=()=>setKb(false);
+recompute(); renderAll(); setKb(kbHidden);
 try{ if("serviceWorker" in navigator && location.protocol==="https:" && !/googleusercontent|script\.google/.test(location.host)) navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){}
 window.__liskub = {logVol, gostVol, cyl, cfg, press, buildPdf, get st(){return st}};
 })();
